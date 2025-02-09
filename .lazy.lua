@@ -22,7 +22,7 @@ local function resolve(groups)
 end
 
 local function get_hl_group(hl)
-    local group = "CyberdreamDev" .. vim.inspect(hl):gsub("%W+", "_")
+    local group = "ridgeliftDev" .. vim.inspect(hl):gsub("%W+", "_")
     if not hl_groups[group] then
         hl = type(hl) == "string" and { link = hl } or hl
         hl = vim.deepcopy(hl, true)
@@ -37,7 +37,7 @@ end
 local function get_group(buf)
     local fname = vim.api.nvim_buf_get_name(buf or 0)
     fname = vim.fs.normalize(fname)
-    if not fname:find("lua/cyberdream/extensions/") then
+    if not fname:find("lua/ridgelift/extensions/") then
         return
     end
     return vim.fn.fnamemodify(fname, ":t:r")
@@ -49,26 +49,26 @@ local function load(group)
     end
     cache[group] = {}
     local opts
-    colors = require("cyberdream.colors").default
+    colors = require("ridgelift.colors").default
     colors.bg_solid = colors.bg ~= "NONE" and colors.bg or colors.bgAlt
-    opts = require("cyberdream.config").options
-    local highlights = require("cyberdream.extensions." .. group).get(opts, colors)
+    opts = require("ridgelift.config").options
+    local highlights = require("ridgelift.extensions." .. group).get(opts, colors)
     for k, v in pairs(highlights) do
         cache[group][k] = get_hl_group(v)
     end
 end
 
 vim.api.nvim_create_autocmd("BufWritePost", {
-    group = vim.api.nvim_create_augroup("cyberdream_dev", { clear = true }),
-    pattern = "*/lua/cyberdream/**.lua",
+    group = vim.api.nvim_create_augroup("ridgelift_dev", { clear = true }),
+    pattern = "*/lua/ridgelift/**.lua",
     callback = vim.schedule_wrap(function(ev)
-        local opts = require("cyberdream.config").options
+        local opts = require("ridgelift.config").options
         for k in pairs(package.loaded) do
-            if k:find("^cyberdream") then
+            if k:find("^ridgelift") then
                 package.loaded[k] = nil
             end
         end
-        require("cyberdream").setup(opts)
+        require("ridgelift").setup(opts)
         vim.cmd.colorscheme(vim.g.colors_name)
         hl_groups = {}
         local hi = require("mini.hipatterns")
@@ -87,7 +87,7 @@ return {
         "echasnovski/mini.hipatterns",
         opts = function(_, opts)
             opts.highlighters = opts.highlighters or {}
-            opts.highlighters.cyberdream = {
+            opts.highlighters.ridgelift = {
                 pattern = function(buf)
                     local group = get_group(buf)
                     if not group or group == "init" then
@@ -106,7 +106,7 @@ return {
                 extmark_opts = { priority = 2000 },
             }
 
-            opts.highlighters.cyberdream_colors = {
+            opts.highlighters.ridgelift_colors = {
                 pattern = {
                     "%f[%w]()t%.[%w_%.]+()%f[%W]",
                 },
@@ -115,7 +115,7 @@ return {
                     local t = _G --[[@as table]]
                     if parts[1]:sub(1, 1) == "t" then
                         table.remove(parts, 1)
-                        colors = require("cyberdream.colors").default
+                        colors = require("ridgelift.colors").default
                         t = colors
                     end
                     local color = vim.tbl_get(t, unpack(parts))
